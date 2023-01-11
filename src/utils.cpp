@@ -9,6 +9,19 @@
 
 namespace qtps {
 
+    // 字符串格式化
+    template<class... T>
+    std::string format(const char *fmt, const T&...t)
+    {
+        const auto len = snprintf(nullptr, 0, fmt, t...);
+        std::string r;
+        r.resize(static_cast<size_t>(len) + 1);
+        snprintf(&r.front(), len + 1, fmt, t...);  // Bad boy
+        r.resize(static_cast<size_t>(len));
+
+        return r;
+    }
+
     std::string UTF82GBK(const QString& s) {
         QTextCodec *code = QTextCodec::codecForName("GBK");//解决中文路径问题
         std::string gbkstr = code->fromUnicode(s).data();

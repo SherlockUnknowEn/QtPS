@@ -2,3 +2,4 @@
 
 #include "thresdialog.h"
 #include "gammadialog.h"
+#include "thicknessdialog.h"

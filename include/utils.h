@@ -15,4 +15,7 @@ namespace qtps {
     void bitsLevels(const cv::Mat& src, std::vector<cv::Mat>& out);
     cv::Mat histogram_equalization(const cv::Mat& src);
     std::vector<float> calHist(const cv::Mat& src);
+
+    template<class... T>
+    std::string format(const char *fmt, const T&...t);
 }

@@ -209,13 +209,13 @@
      <string>编辑</string>
     </property>
     <addaction name="action_cursor"/>
-    <addaction name="actiondraw_line"/>
-    <addaction name="actiondraw_rect"/>
-    <addaction name="actiondraw_cicle"/>
-    <addaction name="actioncolor"/>
+    <addaction name="action_draw_line"/>
+    <addaction name="action_draw_rect"/>
+    <addaction name="action_draw_cicle"/>
+    <addaction name="action_eraser"/>
     <addaction name="separator"/>
-    <addaction name="actioncolor_2"/>
-    <addaction name="actioncuxi"/>
+    <addaction name="action_color"/>
+    <addaction name="action_thickness"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -254,7 +254,7 @@
     <string>光标</string>
    </property>
   </action>
-  <action name="actiondraw_line">
+  <action name="action_draw_line">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -262,7 +262,7 @@
     <string>画线</string>
    </property>
   </action>
-  <action name="actiondraw_rect">
+  <action name="action_draw_rect">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -270,7 +270,7 @@
     <string>画矩形</string>
    </property>
   </action>
-  <action name="actiondraw_cicle">
+  <action name="action_draw_cicle">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -278,7 +278,7 @@
     <string>画圆</string>
    </property>
   </action>
-  <action name="actioncolor">
+  <action name="action_eraser">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -286,12 +286,12 @@
     <string>橡皮擦</string>
    </property>
   </action>
-  <action name="actioncolor_2">
+  <action name="action_color">
    <property name="text">
     <string>颜色选择</string>
    </property>
   </action>
-  <action name="actioncuxi">
+  <action name="action_thickness">
    <property name="text">
     <string>粗细</string>
    </property>

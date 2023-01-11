@@ -4,11 +4,11 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <QMessageBox>
-
+#include <QColorDialog>
+#include <QColor>
 #include <QtCharts/QtCharts>
 #include <QtCharts/QBarSeries>
 #include <QtCharts/QValueAxis>
-#include <QColor>
 
 #include "utils.h"
 #include "my_dialog.h"
@@ -26,7 +26,15 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->m_buttons = {
+
+    m_toolBarActionGroup = std::make_shared<QActionGroup>(this);
+    m_toolBarActionGroup->addAction(ui->action_cursor);
+    m_toolBarActionGroup->addAction(ui->action_draw_line);
+    m_toolBarActionGroup->addAction(ui->action_draw_cicle);
+    m_toolBarActionGroup->addAction(ui->action_draw_rect);
+    m_toolBarActionGroup->addAction(ui->action_eraser);
+
+    this->m_button_group = {
         ui->btn_gray,
         ui->btn_gray_rev,
         ui->btn_binary,
@@ -36,36 +44,13 @@ MainWindow::MainWindow(QWidget *parent)
         ui->btn_hist_mattch
     };
     this->enableButtons(false);
-    connect(ui->action_open, &QAction::triggered, this, &MainWindow::on_open_action_clicked);
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
-void MainWindow::on_open_action_clicked()
-{
-    QString fileName = QFileDialog::getOpenFileName(this, tr("打开图像"), "",
-                                                      tr("Images (*.png *.gif *.jpg *.jpeg *.bmp)"));
-    if (fileName.isEmpty()) {
-        return;
-    }
-    std::string gbk_filename = UTF82GBK(fileName);
-    qDebug() << "fileName = " << QString(gbk_filename.c_str());
-
-    cv::Mat img = cv::imread(gbk_filename, cv::IMREAD_COLOR);
-    if (img.empty()) {
-        QMessageBox::warning(this, tr("异常"), tr("加载图片出错"));
-        return;
-    }
-
-    qDebug() << img.cols << " " << img.rows;
-    this->enableButtons(true);
-    this->ui->label_img1->setMat(img);
-    this->ui->label_img1->showMat();
-}
-
 
 void MainWindow::on_btn_gray_clicked()
 {
@@ -113,7 +98,7 @@ void MainWindow::on_btn_gamma_clicked()
 }
 
 void MainWindow::enableButtons(bool flag) {
-    for (auto& btn : m_buttons) {
+    for (auto& btn : m_button_group) {
         btn->setEnabled(flag);
     }
 }
@@ -181,7 +166,7 @@ void MainWindow::showHistForm(const std::vector<float>& src_prob, const std::vec
 
     //设置X轴参数
     QBarCategoryAxis* axisX = new QBarCategoryAxis();
-    axisX->append(categories);//设置X周标签
+    axisX->append(categories);//设置X标签
     chart->addAxis(axisX, Qt::AlignBottom); //将系列标签放到底下
     series->attachAxis(axisX);
 
@@ -213,5 +198,84 @@ void MainWindow::on_btn_hist_mattch_clicked()
     }
     std::string gbk_filename = UTF82GBK(fileName);
     qDebug() << "fileName = " << QString(gbk_filename.c_str());
+}
+
+void MainWindow::on_action_open_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("打开图像"), "",
+                                                      tr("Images (*.png *.gif *.jpg *.jpeg *.bmp)"));
+    if (fileName.isEmpty()) {
+        return;
+    }
+    std::string gbk_filename = UTF82GBK(fileName);
+    qDebug() << "fileName = " << QString(gbk_filename.c_str());
+
+    cv::Mat img = cv::imread(gbk_filename, cv::IMREAD_COLOR);
+    if (img.empty()) {
+        QMessageBox::warning(this, tr("异常"), tr("加载图片出错"));
+        return;
+    }
+
+    qDebug() << img.cols << " " << img.rows;
+    this->enableButtons(true);
+    this->ui->label_img1->setMat(img);
+    this->ui->label_img1->showMat();
+}
+
+
+void MainWindow::on_action_color_triggered()
+{
+    QColor i = QColorDialog::getColor(Qt::red, this,
+                                              tr("颜色选择"),
+                                              QColorDialog::ShowAlphaChannel);
+    ui->label_img1->setPaintColor(i);
+}
+
+
+void MainWindow::on_action_cursor_triggered(bool checked)
+{
+    ui->label_img1->setEditable(!checked);
+    ui->label_img1->setPaintType(Canvas::PaintType::Cursor);
+}
+
+
+void MainWindow::on_action_draw_line_triggered(bool checked)
+{
+    ui->label_img1->setEditable(checked);
+    ui->label_img1->setPaintType(Canvas::PaintType::Line);
+}
+
+
+void MainWindow::on_action_draw_rect_triggered(bool checked)
+{
+    ui->label_img1->setEditable(checked);
+    ui->label_img1->setPaintType(Canvas::PaintType::Rect);
+}
+
+
+void MainWindow::on_action_draw_cicle_triggered(bool checked)
+{
+    ui->label_img1->setEditable(checked);
+    ui->label_img1->setPaintType(Canvas::PaintType::Cicle);
+}
+
+
+void MainWindow::on_action_eraser_triggered(bool checked)
+{
+    ui->label_img1->setEditable(checked);
+    ui->label_img1->setPaintType(Canvas::PaintType::Eraser);
+}
+
+
+
+
+void MainWindow::on_action_thickness_triggered()
+{
+    std::shared_ptr<ThicknessDialog> thickness_dialog = std::make_shared<ThicknessDialog>(this);
+    thickness_dialog->setValue(ui->label_img1->getPaintThickness());
+    int code = thickness_dialog->exec();
+    if (code == ThicknessDialog::Accepted) {
+        ui->label_img1->setPaintThickness(thickness_dialog->getValue());
+    }
 }
 
