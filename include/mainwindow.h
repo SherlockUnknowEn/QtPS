@@ -25,6 +25,7 @@ private:
 
     void enableButtons(bool flag);
     void showHistForm(const std::vector<float>& prob, const std::vector<float>& dst_prob);
+    cv::Mat readFromFile(QString fullpath);
 
 private slots:
 

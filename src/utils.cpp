@@ -69,7 +69,12 @@ namespace qtps {
     cv::Mat grayReverse(const cv::Mat& src)
     {
         cv::Mat gray;
-        cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
+        if (src.channels() == 3) {
+            cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
+        }
+        if (src.channels() == 1) {
+            gray = src;
+        }
         for (int i = 0; i < gray.rows; i++) {
             for (int j = 0; j < gray.cols; j++) {
                 gray.at<uchar>(i, j) = 255 - gray.at<uchar>(i, j);
@@ -138,7 +143,12 @@ namespace qtps {
      */
     cv::Mat histogram_equalization(const cv::Mat& src) {
         cv::Mat gray;
-        cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
+        if (src.channels() == 3) {
+            cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
+        }
+        if (src.channels() == 1) {
+            gray = src;
+        }
         // 手写 直方图均衡
         // 1. 计算原始灰阶的概率密度
 //        std::vector<float> prob = qtps::calHist(gray);
@@ -151,6 +161,60 @@ namespace qtps {
 //        }
         cv::equalizeHist(gray, gray);
         return gray;
+    }
+
+
+//    1. 计算源图像的累计直方图；
+//    2. 计算规定图像的累计直方图；
+//    3. 计算源图像累计直方图各个灰度阶到规定图像的累计直方图各个灰度阶的差的绝对值；
+//    4. 求出步骤3中各阶中绝对值对应的最小值，最小值对应的灰度阶即为映射后的值。
+    /**
+     * 直方图匹配
+     * @brief histogram_mattch
+     * @param src 原图像
+     * @param dst 需要匹配的图像
+     * @return
+     */
+    cv::Mat histogram_mattch(const cv::Mat& src, const cv::Mat& style) {
+        cv::Mat dst;
+        if (src.size() != style.size()) {
+            cv::resize(style, dst, src.size());
+        } else {
+            dst = style;
+        }
+        cv::Mat out;
+        std::vector<cv::Mat> mv_src;
+        std::vector<cv::Mat> mv_dst;
+        std::vector<cv::Mat> mv_out;
+        cv::split(src, mv_src);
+        cv::split(dst, mv_dst);
+        // 每个通道都做匹配
+        for (size_t c = 0; c < src.channels(); c++) {
+            // 计算原图和目的图的直方图
+            std::vector<float> src_hist = calHist(mv_src[c]);
+            std::vector<float> dst_hist = calHist(mv_dst[c]);
+            //生成LUT映射表 灰阶映射关系
+            cv::Mat lut(1, 256, CV_8U);
+            // 根据概率密度最接近的灰阶映射
+            for (size_t i = 0; i < src_hist.size(); i++) {
+                float min_diff = 1.1;
+                for (size_t j = 0; j < dst_hist.size(); j++) {
+                    float diff = std::abs(src_hist[i] - dst_hist[j]);
+                    if (diff < min_diff) {
+                        min_diff = diff;
+                        lut.at<uchar>(i) = j;
+                    }
+                }
+
+            }
+            cv::Mat channel(mv_src[c].size(), CV_8UC1);
+            // 映射
+            cv::LUT(mv_src[c], lut, channel);
+            mv_out.push_back(channel);
+        }
+        // BGR 合成
+        cv::merge(mv_out, out);
+        return out;
     }
 
     /**
@@ -174,6 +238,7 @@ namespace qtps {
         }
         return prob;
     }
+
 }
 
 

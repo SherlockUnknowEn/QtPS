@@ -192,31 +192,42 @@ void MainWindow::showHistForm(const std::vector<float>& src_prob, const std::vec
 void MainWindow::on_btn_hist_mattch_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("打开需要匹配的图像"), "",
-                                                      tr("Images (*.png *.gif *.jpg *.jpeg *.bmp)"));
+                                                      tr("Images (*.png *.jpg *.jpeg *.bmp)"));
     if (fileName.isEmpty()) {
         return;
     }
-    std::string gbk_filename = UTF82GBK(fileName);
+    cv::Mat img = readFromFile(fileName);
+    cv::Mat dst = qtps::histogram_mattch(ui->label_img1->getMat(), img);
+    ui->label_img2->setMat(dst);
+    ui->label_img2->showMat();
+    cv::imshow(qtps::UTF82GBK("匹配的风格"), img);
+}
+
+
+cv::Mat MainWindow::readFromFile(QString fullpath)
+{
+    std::string gbk_filename = qtps::UTF82GBK(fullpath);
+    cv::Mat img = cv::imread(gbk_filename, cv::IMREAD_COLOR);
+    if (img.empty()) {
+        QMessageBox::warning(this, tr("异常"), tr("加载图片出错"));
+    }
     qDebug() << "fileName = " << QString(gbk_filename.c_str());
+    qDebug() << img.cols << " " << img.rows;
+    return img;
 }
 
 void MainWindow::on_action_open_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("打开图像"), "",
-                                                      tr("Images (*.png *.gif *.jpg *.jpeg *.bmp)"));
+                                                      tr("Images (*.png *.jpg *.jpeg *.bmp)"));
     if (fileName.isEmpty()) {
         return;
     }
-    std::string gbk_filename = UTF82GBK(fileName);
-    qDebug() << "fileName = " << QString(gbk_filename.c_str());
-
-    cv::Mat img = cv::imread(gbk_filename, cv::IMREAD_COLOR);
+    cv::Mat img = readFromFile(fileName);
     if (img.empty()) {
-        QMessageBox::warning(this, tr("异常"), tr("加载图片出错"));
         return;
     }
 
-    qDebug() << img.cols << " " << img.rows;
     this->enableButtons(true);
     this->ui->label_img1->setMat(img);
     this->ui->label_img1->showMat();
@@ -265,8 +276,6 @@ void MainWindow::on_action_eraser_triggered(bool checked)
     ui->label_img1->setEditable(checked);
     ui->label_img1->setPaintType(Canvas::PaintType::Eraser);
 }
-
-
 
 
 void MainWindow::on_action_thickness_triggered()
