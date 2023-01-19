@@ -41,7 +41,10 @@ MainWindow::MainWindow(QWidget *parent)
         ui->btn_gamma,
         ui->btn_bit_levels,
         ui->btn_histogram_equalize,
-        ui->btn_hist_mattch
+        ui->btn_hist_mattch,
+        ui->btn_mean_filter,
+        ui->btn_median_filter,
+        ui->btn_gauss_filter
     };
     this->enableButtons(false);
 
@@ -280,11 +283,71 @@ void MainWindow::on_action_eraser_triggered(bool checked)
 
 void MainWindow::on_action_thickness_triggered()
 {
-    std::shared_ptr<ThicknessDialog> thickness_dialog = std::make_shared<ThicknessDialog>(this);
+    std::shared_ptr<NumInputDialog> thickness_dialog = std::make_shared<NumInputDialog>(this);
+    thickness_dialog->setDialogAttr("线条粗细", 1, 50, 10);
     thickness_dialog->setValue(ui->label_img1->getPaintThickness());
     int code = thickness_dialog->exec();
-    if (code == ThicknessDialog::Accepted) {
+    if (code == NumInputDialog::Accepted) {
         ui->label_img1->setPaintThickness(thickness_dialog->getValue());
     }
+}
+
+
+void MainWindow::on_btn_mean_filter_clicked()
+{
+    std::shared_ptr<NumInputDialog> filter_dialog = std::make_shared<NumInputDialog>(this);
+    filter_dialog->setDialogAttr("滤波器大小", 3, 50, 5);
+    int code = filter_dialog->exec();
+    if (code == NumInputDialog::Accepted) {
+        int sz = filter_dialog->getValue();
+        cv::Mat dst;
+        cv::blur(this->ui->label_img1->getMat(), dst, cv::Size(sz, sz));
+        this->ui->label_img2->setMat(dst);
+        this->ui->label_img2->showMat();
+    }
+}
+
+
+void MainWindow::on_btn_median_filter_clicked()
+{
+    std::shared_ptr<NumInputDialog> filter_dialog = std::make_shared<NumInputDialog>(this);
+    filter_dialog->setDialogAttr("滤波器大小", 3, 50, 5);
+    int code = filter_dialog->exec();
+    if (code == NumInputDialog::Accepted) {
+        int sz = filter_dialog->getValue();
+        if (sz % 2 == 0) {
+            QMessageBox::critical(this, "警告", "滤波器大小必须为奇数");
+            return;
+        }
+        cv::Mat dst;
+        cv::medianBlur(this->ui->label_img1->getMat(), dst, sz);
+        this->ui->label_img2->setMat(dst);
+        this->ui->label_img2->showMat();
+    }
+}
+
+
+void MainWindow::on_btn_gauss_filter_clicked()
+{
+    std::shared_ptr<NumInputDialog> filter_dialog = std::make_shared<NumInputDialog>(this);
+    filter_dialog->setDialogAttr("滤波器大小", 3, 50, 5);
+    int code = filter_dialog->exec();
+    if (code == NumInputDialog::Accepted) {
+        int sz = filter_dialog->getValue();
+        if (sz % 2 == 0) {
+            QMessageBox::critical(this, "警告", "滤波器带下必须为奇数");
+            return;
+        }
+        cv::Mat dst;
+        cv::GaussianBlur(this->ui->label_img1->getMat(), dst, cv::Size(sz, sz), 2);
+        this->ui->label_img2->setMat(dst);
+        this->ui->label_img2->showMat();
+    }
+}
+
+
+void MainWindow::on_btn_laplacian_clicked()
+{
+
 }
 

@@ -44,4 +44,7 @@ private slots:
     void on_action_eraser_triggered(bool checked);
     void on_action_draw_cicle_triggered(bool checked);
     void on_action_thickness_triggered();
+    void on_btn_mean_filter_clicked();
+    void on_btn_median_filter_clicked();
+    void on_btn_gauss_filter_clicked();
 };

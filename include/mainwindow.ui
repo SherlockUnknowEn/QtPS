@@ -82,6 +82,34 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="btn_mean_filter">
+           <property name="text">
+            <string>均值滤波</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_median_filter">
+           <property name="text">
+            <string>中值滤波</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_gauss_filter">
+           <property name="text">
+            <string>高斯滤波</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_laplacian">
+           <property name="text">
+            <string>拉普拉斯锐化</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer_2">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
