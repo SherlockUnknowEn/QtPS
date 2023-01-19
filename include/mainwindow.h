@@ -47,4 +47,5 @@ private slots:
     void on_btn_mean_filter_clicked();
     void on_btn_median_filter_clicked();
     void on_btn_gauss_filter_clicked();
+    void on_btn_laplacian_clicked();
 };
